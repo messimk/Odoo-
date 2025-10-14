@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="my_module.Example">
+        <div class="o_form_view">
+            <p>Hello OWL</p>
+            <button class="btn btn-primary">Check Me</button>
+        </div>
+    </t>
+</templates>
