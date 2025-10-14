@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_zmall_order_fetch_user,zmall.order.fetch.user,model_zmall_order_fetch,base.group_user,1,1,1,0
+access_zmall_order_fetch_manager,zmall.order.fetch.manager,model_zmall_order_fetch,base.group_system,1,1,1,1
+access_zmall_order_user,zmall.order.user,model_zmall_order,base.group_user,1,0,0,0
+access_zmall_order_manager,zmall.order.manager,model_zmall_order,base.group_system,1,1,1,1
+access_zmall_order_item_user,zmall.order.item.user,model_zmall_order_item,base.group_user,1,0,0,0
+access_zmall_order_item_manager,zmall.order.item.manager,model_zmall_order_item,base.group_system,1,1,1,1

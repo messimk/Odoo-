@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_zmall.Navbar" t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
+        <xpath expr="//div[contains(@class, 'menu-button')]/ul/li/ul" position="inside">
+            <li class="menu-item navbar-button edit-button" t-on-click="onZmallClicked">
+                <a class="dropdown-item py-2">Z Mall</a>
+            </li>
+        </xpath>
+    </t>
+    
+    <t t-name="pos_zmall.NavbarTopButton" t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
+        <xpath expr="//div[contains(@class, 'status-buttons')]" position="inside">
+            <button
+                class="o_navbar_button o_navbar_zmall btn btn-light rounded-0 d-flex align-items-center px-3 cursor-pointer"
+                t-on-click="onZmallClicked"
+                type="button"
+                style="margin-right: 8px; height: 100%; align-self: center;"
+            >
+                <img src="/pos_zmall/static/src/img/zmall.jpg" alt="Z Mall" style="height: 24px; width: 24px; margin-right: 8px;"/>
+                Z Mall
+            </button>
+        </xpath>
+    </t>
+</templates>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- System Parameter for Zmall API URL -->
+        <record id="zmall_api_url_config" model="ir.config_parameter">
+            <field name="key">zmall.api.url</field>
+            <field name="value">https://test.zmallapp.com/api/admin/history</field>
+        </record>
+
+        <!-- System Parameter for Zmall API Timeout -->
+        <record id="zmall_api_timeout_config" model="ir.config_parameter">
+            <field name="key">zmall.api.timeout</field>
+            <field name="value">30</field>
+        </record>
+    </data>
+</odoo>

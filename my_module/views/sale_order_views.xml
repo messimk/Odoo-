@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_order_form_inherit_example" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.example</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page name="example_tab" string="Exampleee">
+                    <div>
+                        <t t-js="true">
+                            <t t-component="my_module.Example"/>
+                        </t>
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

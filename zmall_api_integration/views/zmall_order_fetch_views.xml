@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View -->
+    <record id="view_zmall_order_fetch_list" model="ir.ui.view">
+        <field name="name">zmall.order.fetch.list</field>
+        <field name="model">zmall.order.fetch</field>
+        <field name="arch" type="xml">
+            <list string="Zmall Order Fetch History" decoration-success="state=='success'" decoration-danger="state=='failed'">
+                <field name="name"/>
+                <field name="fetch_date"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="records_count"/>
+                <field name="total_pages"/>
+                <field name="state" widget="badge" decoration-success="state=='success'" decoration-danger="state=='failed'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_zmall_order_fetch_form" model="ir.ui.view">
+        <field name="name">zmall.order.fetch.form</field>
+        <field name="model">zmall.order.fetch</field>
+        <field name="arch" type="xml">
+            <form string="Zmall Order Fetch">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,success,failed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_manual_fetch"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-refresh"
+                                invisible="state != 'draft'">
+                            <span>Fetch Now</span>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="fetch_date"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                        <group>
+                            <field name="records_count"/>
+                            <field name="total_pages"/>
+                            <field name="success"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Response Summary" name="response">
+                            <field name="api_response" widget="text"/>
+                        </page>
+                        <page string="Error Details" name="error" invisible="not error_message">
+                            <field name="error_message" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_zmall_order_fetch_search" model="ir.ui.view">
+        <field name="name">zmall.order.fetch.search</field>
+        <field name="model">zmall.order.fetch</field>
+        <field name="arch" type="xml">
+            <search string="Search Zmall Order Fetch">
+                <field name="name"/>
+                <field name="fetch_date"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <filter string="Success" name="success" domain="[('state', '=', 'success')]"/>
+                <filter string="Failed" name="failed" domain="[('state', '=', 'failed')]"/>
+                <separator/>
+                <filter string="Today" name="today" domain="[('fetch_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="This Week" name="this_week" domain="[('fetch_date', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <filter string="This Month" name="this_month" domain="[('fetch_date', '&gt;=', (context_today().replace(day=1)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Fetch Date" name="group_fetch_date" context="{'group_by': 'fetch_date'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_zmall_order_fetch" model="ir.actions.act_window">
+        <field name="name">Zmall Order Fetch</field>
+        <field name="res_model">zmall.order.fetch</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Zmall order fetch records yet
+            </p>
+            <p>
+                This module automatically fetches daily order data from Zmall API at 2 AM every day.
+                You can also manually create and execute fetch operations.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_zmall_root"
+              name="Zmall Integration"
+              sequence="100"/>
+
+    <menuitem id="menu_zmall_order_fetch"
+              name="Order Fetch History"
+              parent="menu_zmall_root"
+              action="action_zmall_order_fetch"
+              sequence="10"/>
+
+    <menuitem id="menu_zmall_config"
+              name="Configuration"
+              parent="menu_zmall_root"
+              sequence="100"/>
+
+    <menuitem id="menu_zmall_system_parameters"
+              name="System Parameters"
+              parent="menu_zmall_config"
+              action="base.ir_config_list_action"
+              sequence="10"/>
+</odoo>

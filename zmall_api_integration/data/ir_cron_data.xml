@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence for Zmall Order Fetch -->
+        <record id="seq_zmall_order_fetch" model="ir.sequence">
+            <field name="name">Zmall Order Fetch Sequence</field>
+            <field name="code">zmall.order.fetch</field>
+            <field name="prefix">ZMALL/</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <!-- Scheduled Action: Fetch Daily Orders at 2 AM -->
+        <record id="ir_cron_zmall_fetch_daily_orders" model="ir.cron">
+            <field name="name">Zmall: Fetch Daily Orders</field>
+            <field name="model_id" ref="model_zmall_order_fetch"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_fetch_daily_orders()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

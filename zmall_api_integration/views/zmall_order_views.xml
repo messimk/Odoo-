@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View -->
+    <record id="view_zmall_order_list" model="ir.ui.view">
+        <field name="name">zmall.order.list</field>
+        <field name="model">zmall.order</field>
+        <field name="arch" type="xml">
+            <list string="Zmall Orders" create="0" edit="0" delete="0">
+                <field name="name"/>
+                <field name="order_date"/>
+                <field name="customer_first_name"/>
+                <field name="customer_last_name"/>
+                <field name="customer_email"/>
+                <field name="total_payment" sum="Total"/>
+                <field name="payment_method"/>
+                <field name="currency_code"/>
+                <field name="total_items"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_zmall_order_form" model="ir.ui.view">
+        <field name="name">zmall.order.form</field>
+        <field name="model">zmall.order</field>
+        <field name="arch" type="xml">
+            <form string="Zmall Order" create="0" edit="0" delete="0">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Order Information">
+                            <field name="zmall_order_id"/>
+                            <field name="unique_id"/>
+                            <field name="order_date"/>
+                            <field name="completed_date"/>
+                            <field name="order_status"/>
+                            <field name="invoice_number"/>
+                        </group>
+                        <group string="Payment Information">
+                            <field name="total_payment"/>
+                            <field name="cash_payment"/>
+                            <field name="card_payment"/>
+                            <field name="wallet_payment"/>
+                            <field name="payment_method"/>
+                            <field name="currency_code"/>
+                            <field name="is_payment_paid"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Customer Information">
+                            <field name="customer_first_name"/>
+                            <field name="customer_last_name"/>
+                            <field name="customer_email"/>
+                            <field name="customer_phone"/>
+                            <field name="customer_country_code"/>
+                        </group>
+                        <group string="Store Information">
+                            <field name="store_name"/>
+                            <field name="store_email"/>
+                            <field name="store_phone"/>
+                            <field name="store_address"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Delivery Information">
+                            <field name="delivery_type"/>
+                            <field name="delivery_price"/>
+                            <field name="delivery_address"/>
+                        </group>
+                        <group string="Provider Information">
+                            <field name="provider_name"/>
+                            <field name="provider_email"/>
+                            <field name="provider_phone"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Order Items" name="items">
+                            <field name="order_item_ids">
+                                <list string="Items" create="0" edit="0" delete="0">
+                                    <field name="product_name"/>
+                                    <field name="item_name"/>
+                                    <field name="item_price"/>
+                                    <field name="quantity"/>
+                                    <field name="total_price" sum="Total"/>
+                                    <field name="item_tax"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Technical Details" name="technical">
+                            <group>
+                                <field name="fetch_id"/>
+                                <field name="order_type"/>
+                                <field name="order_payment_unique_id"/>
+                                <field name="confirmation_code_pickup"/>
+                                <field name="confirmation_code_complete"/>
+                            </group>
+                        </page>
+                        <page string="Raw Data" name="raw_data">
+                            <field name="raw_data" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_zmall_order_search" model="ir.ui.view">
+        <field name="name">zmall.order.search</field>
+        <field name="model">zmall.order</field>
+        <field name="arch" type="xml">
+            <search string="Search Zmall Orders">
+                <field name="name"/>
+                <field name="customer_email"/>
+                <field name="customer_first_name"/>
+                <field name="customer_last_name"/>
+                <field name="customer_phone"/>
+                <field name="store_name"/>
+                <field name="invoice_number"/>
+                <filter string="Paid" name="paid" domain="[('is_payment_paid', '=', True)]"/>
+                <filter string="Unpaid" name="unpaid" domain="[('is_payment_paid', '=', False)]"/>
+                <separator/>
+                <filter string="Today" name="today" domain="[('order_date', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))), ('order_date', '&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+                <filter string="This Week" name="this_week" domain="[('order_date', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <filter string="This Month" name="this_month" domain="[('order_date', '&gt;=', (context_today().replace(day=1)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Order Date" name="group_order_date" context="{'group_by': 'order_date:day'}"/>
+                    <filter string="Customer" name="group_customer" context="{'group_by': 'customer_email'}"/>
+                    <filter string="Store" name="group_store" context="{'group_by': 'store_name'}"/>
+                    <filter string="Payment Method" name="group_payment" context="{'group_by': 'payment_method'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_zmall_order" model="ir.actions.act_window">
+        <field name="name">Zmall Orders</field>
+        <field name="res_model">zmall.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No orders fetched yet
+            </p>
+            <p>
+                Orders will appear here after fetching from Zmall API.
+                Go to Order Fetch History to fetch orders.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_zmall_orders"
+              name="Orders"
+              parent="menu_zmall_root"
+              action="action_zmall_order"
+              sequence="5"/>
+</odoo>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit General Settings Form View -->
+    <record id="res_config_settings_view_form_inherit_zmall" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.zmall</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="90"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app name="zmall_api_integration" string="Zmall Integration">
+                    <block title="API Configuration" name="zmall_api_settings">
+                        <setting id="zmall_api_url_setting"
+                                 help="Configure the Zmall API endpoint for fetching order data">
+                            <field name="zmall_api_url"
+                                   placeholder="https://test.zmallapp.com/api/admin/history"
+                                   class="oe_inline"
+                                   style="width: 500px;"/>
+                            <div class="content-group">
+                                <div class="mt8">
+                                    <label for="zmall_api_timeout"/>
+                                    <field name="zmall_api_timeout" class="oe_inline" style="width: 100px;"/> seconds
+                                </div>
+                                <div class="mt16">
+                                    <button name="action_test_zmall_api_connection"
+                                            type="object"
+                                            string="Test Connection"
+                                            class="btn-primary"
+                                            icon="fa-plug"/>
+                                    <p class="text-muted mt8">
+                                        Click to test the API connection with current settings.
+                                        This will attempt to fetch yesterday's orders.
+                                    </p>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+
+                    <block title="Scheduled Tasks" name="zmall_scheduled_tasks">
+                        <setting string="Automatic Daily Fetch"
+                                 help="The system automatically fetches order data daily at 2:00 AM">
+                            <div class="content-group">
+                                <div class="text-muted">
+                                    <i class="fa fa-clock-o"/> Daily automatic fetch is configured to run at 2:00 AM
+                                </div>
+                                <div class="mt8">
+                                    <button name="%(zmall_api_integration.action_zmall_order_fetch)d"
+                                            type="action"
+                                            string="View Fetch History"
+                                            class="btn-link"
+                                            icon="fa-list"/>
+                                </div>
+                                <div class="mt8">
+                                    <a href="/web#action=base.ir_cron_act&amp;menu_id=base.menu_ir_cron_act"
+                                       class="btn-link">
+                                        <i class="fa fa-cog"/> Configure Scheduled Actions
+                                    </a>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+
+                    <block title="Quick Actions" name="zmall_quick_actions">
+                        <setting string="Manual Fetch">
+                            <div class="content-group">
+                                <div class="text-muted mb8">
+                                    Manually fetch order data for a specific date range
+                                </div>
+                                <button name="%(zmall_api_integration.action_zmall_order_fetch)d"
+                                        type="action"
+                                        string="Fetch Orders Now"
+                                        class="btn-primary"
+                                        icon="fa-download"/>
+                            </div>
+                        </setting>
+                    </block>
+
+                    <block title="Information" name="zmall_information">
+                        <setting>
+                            <div class="content-group">
+                                <div class="alert alert-info" role="alert">
+                                    <h4><i class="fa fa-info-circle"/> About Zmall Integration</h4>
+                                    <ul>
+                                        <li><strong>Automatic Fetch:</strong> Runs daily at 2:00 AM to fetch previous day's orders</li>
+                                        <li><strong>Manual Fetch:</strong> Can be triggered anytime from Order Fetch History</li>
+                                        <li><strong>Data Stored:</strong> Number of records, pages, success/failure status</li>
+                                        <li><strong>Logs:</strong> All operations are logged in Odoo system logs</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Add Zmall Integration menu item to Settings -->
+    <record id="action_zmall_config_settings" model="ir.actions.act_window">
+        <field name="name">Zmall Integration Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'zmall_api_integration'}</field>
+    </record>
+
+    <menuitem id="menu_zmall_settings"
+              name="Settings"
+              parent="menu_zmall_root"
+              action="action_zmall_config_settings"
+              sequence="99"/>
+</odoo>
