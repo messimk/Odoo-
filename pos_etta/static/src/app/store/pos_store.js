@@ -6,6 +6,7 @@ import { NumberPopup } from "@point_of_sale/app/utils/input_popups/number_popup"
 import { _t } from "@web/core/l10n/translation";
 import { ErrorPopup } from "@point_of_sale/app/errors/popups/error_popup";
 import { serializeDateTime } from "@web/core/l10n/dates";
+import { Navbar } from "@point_of_sale/app/navbar/navbar";
 
 patch(PosStore.prototype, {
     async setup() {
@@ -26,8 +27,8 @@ patch(PosStore.prototype, {
         await super.setup(...arguments);
 
         // Auto-start FS polling when POS loads
-        console.log("🚀 AUTO-STARTING FS POLLING on POS load...");
-        this.startFsPolling();
+        console.log("🚀 AUTO-STARTING FS POLLING on POS loadaaa...");
+       
     },
     is_refund_order() {
         return this.is_refund;
@@ -807,21 +808,20 @@ patch(PosStore.prototype, {
 
 
 // FS Number Polling System - 3 second interval (from pos_ettaa)
-    startFsPolling() {
+     startFsPolling() {
         // Clear any existing interval
-        this.stopFsPolling();
-
-        // Fixed 3-second polling interval
-        const interval = 3 * 1000; // 3 seconds in milliseconds
-        console.log(`Starting FS polling with interval: ${interval}ms`);
-
-        // Initial sync
+        // this.stopFsPolling();
+        
+        console.log("🔄 Starting FS polling system...");
+        
+        // Run initial sync immediately
         this.syncFiscalDataAutomatic();
-
-        // Set up recurring sync every 3 seconds
+        
+        // Set up 3-second interval polling
         this.fsPollingInterval = setInterval(() => {
             this.syncFiscalDataAutomatic();
-        }, interval);
+        }, 3000); // Poll every 3 seconds
+        console.log("✅ FS polling started with 3-second interval");
     },
 
     stopFsPolling() {
@@ -832,93 +832,87 @@ patch(PosStore.prototype, {
         }
     },
 
-     async syncFiscalDataAutomatic() {
-        console.log(" Starting automatic fiscal data sync..."); // Function entry point
+   async syncFiscalDataAutomatic() {
+        console.log("🔄 Starting automatic fiscal data sync...");
         try {
-            // STEP 1: Query backend database for specific orders
-           const ordersWithFs = await this.orm.call(
+            // Fetch orders with FS numbers in draft or new state
+            const ordersWithFs = await this.orm.call(
                 'pos.order',
                 'search_read',
                 [
                     [
                         '&',
-                            '|',
-                                ['fs_no', 'not in', [false, '']],
-                                ['rf_no', 'not in', [false, '']],
-                            ['state', 'in', ['draft', 'new']],
+                        ['fs_no', 'not in', [false, '']],
+                        ['state', 'in', ['draft', 'new']]
                     ],
                     ['pos_reference', 'fs_no', 'rf_no', 'state', 'fiscal_mrc', 'ej_checksum']
                 ]
             );
 
             if (ordersWithFs.length === 0) {
-                console.log("✅ No more orders to process - stopping polling");
-                this.stopFsPolling(); // Auto-stop polling when no orders remain
-                return; // Exit early if no orders match criteria
+                console.log("✋ No orders to process, polling cycle complete");
+                return;
             }
-            console.log(` Processing ${ordersWithFs.length} orders with FS to auto-validate`);
+            console.log(`📦 Processing ${ordersWithFs.length} orders with FS to auto-validate`);
 
-            // STEP 3: Get all local orders (orders in frontend memory)
-            const localOrders = this.orders || []; // Get current orders or empty array
-            // STEP 4: Loop through each backend order
+            const localOrders = this.orders || [];
             for (const backendOrder of ordersWithFs) {
-
-                // Extract order data from backend
                 const { pos_reference, fs_no, rf_no, state, fiscal_mrc, ej_checksum } = backendOrder;
+                const order = localOrders.find(o => o.name === pos_reference);
+                console.log("Match result:", order);
 
-                // STEP 5: Find matching local order
-                const order = localOrders.find(o => {
-                    return o.name === pos_reference;
-                });
-                console.log(" Match resulttttoo:", order);
                 if (!order) {
-                    continue; // Skip to next order if not found locally
+                    console.log(`⚠️ Order not found in local orders: ${pos_reference}`);
+                    continue;
                 }
-                // STEP 6: Auto-validate the order (fiscal data already in backend)
-                console.log(" Starting auto-validation process...");
+
+                console.log(`✅ Starting auto-validation process for: ${order.name}`);
                 try {
-                    // Set this order as the current/active order
                     if (this.get_order() !== order) {
                         this.set_order(order);
                         console.log("   ✓ Order set as current");
                     } else {
                         console.log("   ℹ Order already current");
                     }
-                    // Get payment screen component
+
+                    if (!order.paymentlines || order.paymentlines.length === 0) {
+                        console.log(`⚠️ Order ${order.name} has no payment methods - will retry later`);
+                        continue;
+                    }
+
+                    if (this.env.services.pos?.showScreen) {
+                        this.env.services.pos.showScreen('PaymentScreen');
+                        console.log("   ✓ Navigated to PaymentScreen");
+                    }
+
                     const paymentScreen = this.env.services.pos?.payment_screen;
-                    // Wait 1 second then validate (gives UI time to update)
                     setTimeout(async () => {
                         try {
-                            // Try method 1: Call validateOrder function directly
-                            console.log("🔧 Attempting method 1: Direct validateOrder call...");
                             if (paymentScreen && typeof paymentScreen.validateOrder === 'function') {
                                 await paymentScreen.validateOrder(true);
-                                console.log(` ${order.name} successfully auto-validated via function call!`);
-                           } 
-                             else {
-                                // Fallback method 2: Click validate button in DOM
-                                const validateButton = document.querySelector('.payment-screen .button.next.highlight');
+                                console.log(`✅ ${order.name} successfully auto-validated via function call!`);
+                            } else {
+                                console.warn(`⚠️ PaymentScreen or validateOrder not available for ${order.name}`);
+                                const validateButton = document.querySelector('.payment-screen .btn-primary');
                                 if (validateButton) {
                                     validateButton.click();
-                                    console.log(` ${order.name} validation triggered via button click!`);
+                                    console.log(`✅ ${order.name} validation triggered via button click!`);
                                 } else {
-                                    console.log(" Validate button not found in DOM");
+                                    console.error(`❌ Validate button not found in DOM for ${order.name}. Current screen:`, this.env.services.pos.currentScreen);
                                 }
                             }
                         } catch (valError) {
-                            console.error(` Validation error for ${order.name}:`, valError.message);
+                            console.error(`❌ Validation error for ${order.name}:`, valError);
                         }
-                    }, 1000);
-
+                    }, 2000);
                 } catch (error) {
-                    console.error(` Error processing ${order.name}:`, error.message);
+                    console.error(`Error processing ${order.name}:`, error);
                 }
             }
 
-            console.log("\n Polling cycle completed successfully");
+            console.log("🏁 Polling cycle completed successfully");
         } catch (error) {
-            console.error(" Critical polling error:", error.message);
-            console.error("Stack trace:", error.stack);
+            console.error("🚨 Critical polling error:", error.message, error.stack);
         }
     },
 
@@ -1013,5 +1007,23 @@ patch(LocalDisplay.prototype, {
                 console.warn("fixScrollingIfNecessary is not a function on popupWindow.");
             }
         }, 0);
+    }
+});
+
+import { ClosePosPopup } from "@point_of_sale/app/navbar/closing_popup/closing_popup";
+// Patch Navbar to run fiscal polling when close session button is clicked
+patch(Navbar.prototype, {
+    async closeSession() {
+        console.log("🔄 Close session button clicked - starting fiscal polling...");
+        
+        // Run fiscal polling first before opening the close session popup
+        if (this.pos.startFsPolling) {
+            console.log("🔄 Running fiscal sync before session closing...");
+            await this.pos.startFsPolling('session_close_button_click');
+        }
+        
+        // Now proceed with the normal close session flow
+        const info = await this.pos.getClosePosInfo();
+        this.popup.add(ClosePosPopup, { ...info });
     }
 });

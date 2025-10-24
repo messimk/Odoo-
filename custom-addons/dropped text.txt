@@ -1,1 +1,0 @@
-/opt/odoo17/odoo17-custom-addons/zoorya_website_front

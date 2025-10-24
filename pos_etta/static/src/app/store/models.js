@@ -857,6 +857,15 @@ patch(Order.prototype, {
 
                     this.pos.makeLogEntry("Fiscal Receipt Printing Successfully");
 
+                    // Run polling after successful receipt print
+                    if (this.pos.startFsPolling) {
+                        try {
+                            await this.pos.startFsPolling('receipt_print');
+                        } catch (pollingError) {
+                            console.error("Error during post-print polling:", pollingError.message);
+                        }
+                    }
+
                     var get_existing_data = localStorage.getItem('VOIDED_ORDERS');
                     if (get_existing_data) {
                         var parsedData = JSON.parse(get_existing_data);

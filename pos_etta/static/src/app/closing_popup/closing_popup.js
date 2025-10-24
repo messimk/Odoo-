@@ -7,10 +7,12 @@ import { _t } from "@web/core/l10n/translation";
 
 patch(ClosePosPopup.prototype, {
     async closeSession() {
-        // Start polling on session close (same behavior as session open)
-        console.log("🚀 Starting FS polling on session close...");
-        this.pos.startFsPolling();
-
+        console.log("🔄 Running fiscal sync before session closing...");
+        // Run polling first to check for any pending fiscal numbers
+        if (this.pos.startFsPolling) {
+            await this.pos.startFsPolling('session_close'); // Run sync once before session closes
+        }
+        
         await this.syncDevice();
         if (this.pos.config.z_on_closing) {
             if (window.Android != undefined) {

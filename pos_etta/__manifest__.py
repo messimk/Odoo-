@@ -34,7 +34,11 @@
             'pos_etta/static/src/app/product_low_stock_screen/product_low_stock_screen.xml',
 
             'pos_etta/static/src/app/product_low_stock_screen/low_stock_line/low_stock_line.js',
-            'pos_etta/static/src/app/product_low_stock_screen/low_stock_line/low_stock_line.xml'
+            'pos_etta/static/src/app/product_low_stock_screen/low_stock_line/low_stock_line.xml',
+            
+            # Add the new patches for polling on session open/close
+            'pos_etta/static/src/app/store/cash_opening_popup/cash_opening_popup.js',
+            'pos_etta/static/src/app/closing_popup/closing_popup.js'
         ],
         'point_of_sale.assets': [
             'pos_etta/static/src/app/control_button/*',
